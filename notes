@@ -1,0 +1,50 @@
+Arch Linux Install
+
+(These are personal notes for a basic install of Arch Linux. I made several attempts to
+install for an UEFI set up while following the ArchWiki and could not get it right. 
+I ended up watching this video from DT/Distrotube https://youtu.be/PQgyW10xD8s and it 
+helped me understand it better so here
+
+I am starting after the partition segment. I did premade partitions with gparted
+from a live usb prior to this.
+
+
+	--After creating partitions the way you want.
+
+	$ pacstrap /mnt base linux linux-firmware
+	$ genfstab -U /mnt >> /mnt/etc/fstab
+	$ arch-chroot /mnt
+	$ ln-sf /usr/share/zoneinfo/America/Chicago /etc/local/time
+		if you need to find your city
+		$ ls /user/share/info
+	$ hwclock --systohc
+	$ vim /locale.gen -uncomment your locale
+	$ locale.gen
+	$ vim /etc/hostname -add your hostname (pick any name)
+	$ vim /etc/hosts
+		- add
+		-127.0.0.1	localhost
+		-::1		localhost
+		-127.0.0.1	primal.localdomain	primal
+		-(primal was the hostname that i chose for my system)
+
+	$ passwd
+	$ useradd -m username
+	$ passed username
+
+	add member to groups
+	$ usermod -aG wheel,audio,video,optical,storage
+	$ pacman -S sudo
+	$ EDITOR=vim visudo
+		- go into file and uncomment line where you see wheelgroup
+
+	$ pacman -S grub efibootmgr dosfstools os-prober mtools
+	$ mkdir /boot/EFI
+	$ mount /dev/sda2 /boot/EFI
+	$ grub-install --target=x86_64-efi bootloader-id=grub_uefi --recheck
+	$ grub-mkconfig -o /boot/grub/grub.cfg
+	$ pacman -S networkmanager git
+	$ systemctl enable NetworkManager
+		-creates sym link
+	$ exit
+	$ reboot
