@@ -10,18 +10,28 @@ from a live usb prior to this.
 
 
 	--After creating partitions the way you want.
-
-	$ pacstrap /mnt base linux linux-firmware
-	$ genfstab -U /mnt >> /mnt/etc/fstab
-	$ arch-chroot /mnt
-	$ ln-sf /usr/share/zoneinfo/America/Chicago /etc/local/time
+    $ sudo mount <partition> /mnt
+        ie. sudo mount /dev/nvme0n1p2 /mnt
+	
+    $ pacstrap /mnt base linux linux-firmware
+	
+    $ genfstab -U /mnt >> /mnt/etc/fstab
+	
+    $ arch-chroot /mnt
+	
+    $ ln-sf /usr/share/zoneinfo/America/Chicago /etc/localtime
 		if you need to find your city
 		$ ls /user/share/info
-	$ hwclock --systohc
-	$ vim /locale.gen -uncomment your locale
-	$ locale.gen
-	$ vim /etc/hostname -add your hostname (pick any name)
-	$ vim /etc/hosts
+	
+    $ hwclock --systohc
+	
+    $ vim /locale.gen -uncomment your locale
+	
+    $ locale.gen
+	
+    $ vim /etc/hostname -add your hostname (pick any name)
+	
+    $ vim /etc/hosts
 		- add
 		-127.0.0.1	localhost
 		-::1		localhost
@@ -33,7 +43,7 @@ from a live usb prior to this.
 	$ passed username
 
 	add member to groups
-	$ usermod -aG wheel,audio,video,optical,storage
+	$ usermod -aG wheel,audio,video,optical,storage,lp <user>
 	$ pacman -S sudo
 	$ EDITOR=vim visudo
 		- go into file and uncomment line where you see wheelgroup
@@ -46,5 +56,8 @@ from a live usb prior to this.
 	$ pacman -S networkmanager git
 	$ systemctl enable NetworkManager
 		-creates sym link
+
+    now you want to add any packages you want to start the system with
+
 	$ exit
 	$ reboot
