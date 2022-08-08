@@ -1,0 +1,126 @@
+# new arch install notes while in virtualbox
+# following video from Ermano Linux Made Simple https://youtu.be/_3-OMUQTf_k
+
+VirtualBox settings
+System- enable EFI(special os only)
+Video Mem- max to 128
+Network- Bridged adapter, advanced promiscious mode change to Allow all
+Storage- attach arch iso
+
+sudo pacman -Syy reflector openssh
+systemctl start sshd
+passwd
+ip a
+
+switch to your terminal
+ssh root@<ip address>
+timedatectl set-ntp true
+
+reflector -c Switzerland -a 6 --sort rate --save /etc/pacman.d/mirrorlist
+sudo reflector --verbose --country 'India' -l 5 --sort rate --save /etc/pacman.d/mirrorlist
+pacman -Syy
+
+lsblk
+-you will see loop0,sda,sr0
+
+gdisk /dev/sda
+    n for new
+    default 1 enter
+    first sector enter
+    last sector +200M
+    define type code ef00
+
+    second partition
+    n for new
+    default2 enter
+    first sector enter
+    last sector enter
+    define type code enter
+
+    press w to write and then enter
+
+lsblk to check partitions
+
+format
+mkfs.fat -F32 /dev/sda1
+mkfs.ext4 /dev/sda2
+
+mount /dev/sda2 /mnt
+mkdir -p /mnt/boot/efi
+mount /dev/sda1 /mnt/boot/efi
+
+lsblk
+check mountpoints
+
+pacstrap /mnt base linux linux-firmware vim
+
+if you run into a problem with corrupt packages do pacman -S archlinux-keyring
+
+installing packages
+
+genfstab -U >> /mnt/etc/fstab
+cat /mnt/etc/fstab
+
+arch-chroot /mnt
+
+dd if=/dev/zero of=/swapfile bs=1G count=2 status=progress
+
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+
+vim /etc/fstab
+/swapfile none swap defaults 0 0
+
+timdatectl list-timezones | grep US
+ln -sf /usr/share/zoneinfo/US/Central /etc/localtime
+hwclock --systohc
+
+vim /etc/locale.gen
+uncomment your locale
+
+locale.gen
+
+echo LANG=en_US.UTF-8 >> /etc/locale.conf
+
+vim /etc/hostname
+vim /etc/hosts
+    127.0.0.1 localhost
+    ::1       localhost
+    127.0.1.1 arch.localdomain  arch
+
+passwd
+
+pacman -S grub efibootmgr networkmanager network-manager-applet dialog
+os-prober mtools dosfstools base-devel linux-headers reflector openssh git
+xdg-utils xdg-user-dirs virtualbox-guest-utils
+
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
+
+grub-mkconfig -o /boot/grub/grub.cfg
+
+systemctl enable NetworkManager
+systemctl enable sshd
+
+useradd -mG wheel trg
+
+passwd trg
+
+EDITOR=vim visudo
+uncomment wheel
+
+exit
+umount -a
+reboot
+
+
+installing the desktop environment
+
+sudo pacman -S xf86-video-vmware xorg lightdm lightdm-gtk-greeter xfce4
+xfce4-goodies firefox kitty ranger papirus-icon-theme materia-gtk-theme
+
+sudo systemctl enable lightdm
+exit
+
+
+
